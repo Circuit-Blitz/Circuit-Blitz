@@ -17,6 +17,9 @@ public class CarController : MonoBehaviour
     
     private Vector3 currentEulerAngles;
 
+    public Transform leftFrontWheel, rightFrontWheel;
+    public float maxWheelTurn = 25f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -41,6 +44,9 @@ public class CarController : MonoBehaviour
         if (grounded) {
             currentEulerAngles += new Vector3(0f, turnInput * turnStrength * Time.deltaTime * Input.GetAxis("Vertical"), 0);
         }
+        
+        leftFrontWheel.localRotation = Quaternion.Euler(leftFrontWheel.localRotation.eulerAngles.x, (turnInput * maxWheelTurn) - 180, leftFrontWheel.localRotation.eulerAngles.x);
+        rightFrontWheel.localRotation = Quaternion.Euler(rightFrontWheel.localRotation.eulerAngles.x, turnInput * maxWheelTurn, rightFrontWheel.localRotation.eulerAngles.x);
         
         transform.eulerAngles = currentEulerAngles;
         transform.position = RB.transform.position;

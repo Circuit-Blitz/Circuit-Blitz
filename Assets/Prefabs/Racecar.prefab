@@ -365,11 +365,16 @@ MonoBehaviour:
   maxSpeed: 50
   turnStrength: 100
   gravityForce: 10
+  dragOnGround: 2
+  dragInAir: 0.1
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
   groundRayLength: 0.5
   groundRayPoint: {fileID: 3272339918593647538}
+  leftFrontWheel: {fileID: 3909917453850672185}
+  rightFrontWheel: {fileID: 5106206032115385121}
+  maxWheelTurn: 25
 --- !u!1 &4301191586776495277
 GameObject:
   m_ObjectHideFlags: 0
