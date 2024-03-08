@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1325441089058586736
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3272339918593647538}
+  m_Layer: 6
+  m_Name: raypoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3272339918593647538
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1325441089058586736}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5160246789347131790}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2300769548589236840
 GameObject:
   m_ObjectHideFlags: 0
@@ -12,7 +43,7 @@ GameObject:
   - component: {fileID: 1841436774297925734}
   - component: {fileID: 5203283890429515178}
   - component: {fileID: 8950029235443366310}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: wheel_frontLeft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -137,7 +168,7 @@ GameObject:
   - component: {fileID: 309803392640652097}
   - component: {fileID: 8212606745824912187}
   - component: {fileID: 6912970068665661697}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: wheel_backLeft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -261,7 +292,7 @@ GameObject:
   - component: {fileID: 5160246789347131790}
   - component: {fileID: 461302714308187615}
   - component: {fileID: 6717787984469145613}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Racecar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -286,6 +317,7 @@ Transform:
   - {fileID: 5257349221026180701}
   - {fileID: 3909917453850672185}
   - {fileID: 5106206032115385121}
+  - {fileID: 3272339918593647538}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &461302714308187615
@@ -332,6 +364,12 @@ MonoBehaviour:
   reverseAccel: 4
   maxSpeed: 50
   turnStrength: 100
+  gravityForce: 10
+  whatIsGround:
+    serializedVersion: 2
+    m_Bits: 8
+  groundRayLength: 0.5
+  groundRayPoint: {fileID: 3272339918593647538}
 --- !u!1 &4301191586776495277
 GameObject:
   m_ObjectHideFlags: 0
@@ -344,7 +382,7 @@ GameObject:
   - component: {fileID: 3029242893727978220}
   - component: {fileID: 1940990498145515556}
   - component: {fileID: 2856540046183360295}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: wheel_frontRight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -469,7 +507,7 @@ GameObject:
   - component: {fileID: 7333741722629451262}
   - component: {fileID: 5549512295861852220}
   - component: {fileID: 4989000833403016240}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: wheel_backRight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -594,7 +632,7 @@ GameObject:
   - component: {fileID: 9182558199821302461}
   - component: {fileID: 5374546526620674920}
   - component: {fileID: 6042850536858815010}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
