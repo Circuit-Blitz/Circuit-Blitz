@@ -5,7 +5,7 @@ using UnityEngine;
 public class CarController : MonoBehaviour
 {
     public Rigidbody RB;
-    public float forwardAccel = 8f, reverseAccel = 4f, maxSpeed = 50f, turnStrength = 100f, gravityForce = 10f;
+    public float forwardAccel = 8f, reverseAccel = 4f, maxSpeed = 50f, turnStrength = 100f, gravityForce = 10f, dragOnGround = 2f, dragInAir = 0.1f;
     
     private float speedInput, turnInput;
     
@@ -15,9 +15,12 @@ public class CarController : MonoBehaviour
     public float groundRayLength = 0.5f;
     public Transform groundRayPoint;
     
+    private Vector3 currentEulerAngles;
+
     // Start is called before the first frame update
     void Start()
     {
+        currentEulerAngles = transform.rotation.eulerAngles;
     }
 
     // Update is called once per frame
@@ -36,9 +39,10 @@ public class CarController : MonoBehaviour
         turnInput = Input.GetAxis("Horizontal");
         
         if (grounded) {
-            transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + new Vector3(0f, turnInput * turnStrength * Time.deltaTime * Input.GetAxis("Vertical"), 0));
+            currentEulerAngles += new Vector3(0f, turnInput * turnStrength * Time.deltaTime * Input.GetAxis("Vertical"), 0);
         }
         
+        transform.eulerAngles = currentEulerAngles;
         transform.position = RB.transform.position;
     }
     
@@ -52,13 +56,15 @@ public class CarController : MonoBehaviour
             grounded = true;
         }
         
-        Debug.Log(grounded);
-        
         if (grounded) {
+            RB.drag = dragOnGround;
+
             if (Mathf.Abs(speedInput) > 0) {
                 RB.AddForce(transform.forward * speedInput);
             }
         } else {
+            RB.drag = dragInAir;
+
             RB.AddForce(Vector3.up * -gravityForce * 100f);
         }
     }
