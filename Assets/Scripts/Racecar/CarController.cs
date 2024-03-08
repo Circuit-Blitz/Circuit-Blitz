@@ -54,6 +54,8 @@ public class CarController : MonoBehaviour
         
         if (Physics.Raycast(groundRayPoint.position, -transform.up, out hit, groundRayLength, whatIsGround)) {
             grounded = true;
+            
+            currentEulerAngles = (Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation).eulerAngles;
         }
         
         if (grounded) {
