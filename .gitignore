@@ -76,3 +76,4 @@ crashlytics-build.properties
 
 # Remove Addons from commit
 /[Aa]ssets/[Aa]ddons
+.vscode/settings.json
