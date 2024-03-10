@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class CarController : NetworkBehaviour
 {
-    
     [SerializeField] private float forwardAccel = 8f;
     [SerializeField] private float reverseAccel = 4f;
     [SerializeField] private float turnStrength = 100f;
@@ -27,6 +26,7 @@ public class CarController : NetworkBehaviour
     // Start is called before the first frame update
     public override void OnNetworkSpawn()
     {
+        // Only the local player should run this code
         if (!IsOwner) return;
 
         // Get the Map
@@ -46,9 +46,6 @@ public class CarController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        // If this car is not yours, you cant drive it
-        if (!IsOwner) return;
-
         speedInput = 0f;
 
         if (Input.GetAxis("Vertical") > 0) {
@@ -71,10 +68,8 @@ public class CarController : NetworkBehaviour
         transform.position = RB.transform.position;
     }
     
-    private void FixedUpdate() {
-        // If this car is not yours, you cant drive it
-        if (!IsOwner) return;
-
+    private void FixedUpdate()
+    {
         grounded = false;
 
         RaycastHit hit;
