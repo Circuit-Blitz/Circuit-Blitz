@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 public class GameManager : NetworkBehaviour
 {
     [SerializeField] private Transform PlayerPrefab;
+    [SerializeField] private String mapName;
 
     public override void OnNetworkSpawn()
     {
@@ -19,8 +20,12 @@ public class GameManager : NetworkBehaviour
         DontDestroyOnLoad(this);
     }
     
-    public void LoadMap(String mapName) {
-        NetworkManager.SceneManager.LoadScene(mapName, LoadSceneMode.Single);
+    public void SetMap(String mapName) {
+        this.mapName = mapName;
+    }
+    
+    public void StartGame() {
+        NetworkManager.SceneManager.LoadScene(this.mapName, LoadSceneMode.Single);
     }
 
     private void SceneManager_OnSceneEvent(SceneEvent sceneEvent) {
