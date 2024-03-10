@@ -1,17 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public GameObject Player;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        transform.position = Player.transform.position;
-        transform.rotation = Player.transform.rotation;
-    }
+    public Transform Player;
 
     // Update is called once per frame
     void FixedUpdate()
