@@ -34,11 +34,11 @@ public class CarController : NetworkBehaviour
         PlayerCamera = Instantiate(PlayerCameraPrefab);
         PlayerCamera.GetComponent<CameraController>().Player = transform;
     }
-    
+
     private void Update() {
         // Only the local player should run this code
         if (!IsOwner) return;
-        
+
         // Sync transform with Rigidbody
         transform.rotation = RB.rotation;
         transform.position = RB.position;
@@ -46,6 +46,17 @@ public class CarController : NetworkBehaviour
         // Turn wheels based on horizontal input
         leftFrontWheel.localRotation = Quaternion.Euler(leftFrontWheel.localRotation.eulerAngles.x, (turnInput * maxWheelTurn) - 180, leftFrontWheel.localRotation.eulerAngles.x);
         rightFrontWheel.localRotation = Quaternion.Euler(rightFrontWheel.localRotation.eulerAngles.x, turnInput * maxWheelTurn, rightFrontWheel.localRotation.eulerAngles.x);
+
+        // Determine the speed based on input
+        speedInput = 0f;
+        if (Input.GetAxis("Vertical") > 0) {
+            speedInput = Input.GetAxis("Vertical") * forwardAccel * 1000f;
+        } else if (Input.GetAxis("Vertical") < 0) {
+            speedInput = Input.GetAxis("Vertical") * reverseAccel * 1000f;
+        }
+
+        // Determine the turn based on input
+        turnInput = Input.GetAxis("Horizontal");
     }
 
     private void FixedUpdate()
@@ -53,16 +64,6 @@ public class CarController : NetworkBehaviour
         // Only the local player should run this code
         if (!IsOwner) return;
 
-        speedInput = 0f;
-
-        if (Input.GetAxis("Vertical") > 0) {
-            speedInput = Input.GetAxis("Vertical") * forwardAccel * 1000f;
-        } else if (Input.GetAxis("Vertical") < 0) {
-            speedInput = Input.GetAxis("Vertical") * reverseAccel * 1000f;
-        }
-
-        turnInput = Input.GetAxis("Horizontal");
-        
         // Detect if the car is grounded
         RaycastHit hit;
         grounded = false;
@@ -70,6 +71,8 @@ public class CarController : NetworkBehaviour
             grounded = true;
         }
 
+        // If car is on ground, then player can turn and move the car forwards and backwards
+        // Change drag based on whether the car is on the ground or not 
         if (grounded) {
             RB.drag = dragOnGround;
 
@@ -79,9 +82,7 @@ public class CarController : NetworkBehaviour
             RB.MoveRotation(RB.rotation * q);
 
             // Move the car forwards or backwards based on vertical input
-            if (Mathf.Abs(speedInput) > 0) {
-                RB.AddRelativeForce(Vector3.forward * speedInput * Time.fixedDeltaTime);
-            }
+            RB.AddRelativeForce(Vector3.forward * speedInput * Time.fixedDeltaTime);
         } else {
             RB.drag = dragInAir;
         }
