@@ -22,16 +22,21 @@ public class GameOptionsUI : MonoBehaviour
 
     public void UpdatePlayerList()
     {
+        // Loop through and destroy all children (O_o)
         foreach (Transform child in PlayerList.transform)
         {
             Destroy(child.gameObject);
         }
 
+        // Destroy is deferred to the end of the frame
+        // Use DetachChildren to ensure that childCount is 0
+        PlayerList.DetachChildren();
+
         foreach (KeyValuePair<ulong, String> kv in GameManager.Instance.getPlayerListIterator()) {
             AddPlayer(kv.Key);
         }
     }
-    
+
     private void AddPlayer(ulong playerId) {
         RectTransform tag = Instantiate(UsernameTag);
         tag.transform.SetParent(PlayerList);

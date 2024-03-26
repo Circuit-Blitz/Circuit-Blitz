@@ -19,10 +19,13 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private Transform PlayerPrefab;
     [SerializeField] private String mapName;
     [SerializeField] private UDictionary<ulong, String> players = new UDictionary<ulong, string>();
+    
+    public override void OnNetworkSpawn() {
+        // Event when new player joins
+        NetworkManager.Singleton.OnConnectionEvent += onConnectionEvent;
 
-    public override void OnNetworkSpawn()
-    {
         if (IsServer) {
+            // Event when the scene manager loads a new scene
             NetworkManager.SceneManager.OnSceneEvent += SceneManager_OnSceneEvent;
         }
     }
@@ -32,30 +35,44 @@ public class GameManager : NetworkBehaviour
         _instance = this;
         // Don't destroy this GameObject when a scene is loaded
         DontDestroyOnLoad(this);
-        // Event when new player joins
-        NetworkManager.Singleton.OnConnectionEvent += AddPlayer;
     }
     
     public void SetMap(String mapName) {
         this.mapName = mapName;
     }
 
-    public void AddPlayer(NetworkManager manager, ConnectionEventData data) {
-        if (manager.IsServer && !players.ContainsKey(data.ClientId)) {
-            Debug.Log(data.ClientId);
+    public void onConnectionEvent(NetworkManager manager, ConnectionEventData data) {
+        switch (data.EventType)
+        {
+            case ConnectionEvent.ClientConnected: {
+                if (manager.IsServer && !players.ContainsKey(data.ClientId)) {
+                    // Replicate adding the player to everyone
+                    AddPlayerRpc(data.ClientId, "Player", RpcTarget.Everyone);
 
-            // Replicate adding the player to everyone
-            AddPlayerRpc(data.ClientId, "Player", RpcTarget.Everyone);
+                    // Sync current player list with new player
+                    foreach (KeyValuePair<ulong, String> kv in players)
+                    {
+                        AddPlayerRpc(kv.Key, kv.Value, RpcTarget.Single(data.ClientId, RpcTargetUse.Temp));
+                    }
 
-            // Sync current player list with new player
-            foreach (KeyValuePair<ulong, String> kv in players)
-            {
-                AddPlayerRpc(kv.Key, kv.Value, RpcTarget.Single(data.ClientId, RpcTargetUse.Temp));
+                    // If we are in the main menu, then sync Player List (User Interface)
+                    if (SceneManager.GetActiveScene().name == "MainMenu") {
+                        UpdatePlayerListUIRpc();
+                    }
+                }
+
+                break;
             }
+            case ConnectionEvent.ClientDisconnected: {
+                // Replicate adding the player to everyone
+                RemovePlayerRpc(data.ClientId, RpcTarget.Everyone);
 
-            // If we are in the main menu, then sync Player List (User Interface)
-            if (SceneManager.GetActiveScene().name == "MainMenu") {
-                UpdatePlayerListUIRpc();
+                // If we are in the main menu, then sync Player List (User Interface)
+                if (SceneManager.GetActiveScene().name == "MainMenu") {
+                    UpdatePlayerListUIRpc();
+                }
+                
+                break;
             }
         }
     }
@@ -71,6 +88,13 @@ public class GameManager : NetworkBehaviour
     public void AddPlayerRpc(ulong playerId, String username, RpcParams rpcParams) {
         if (!players.ContainsKey(playerId)) {
             players.Add(playerId, username);
+        }
+    }
+
+    [Rpc(SendTo.SpecifiedInParams)]
+    public void RemovePlayerRpc(ulong playerId, RpcParams rpcParams) {
+        if (players.ContainsKey(playerId)) {
+            players.Remove(playerId);
         }
     }
 
