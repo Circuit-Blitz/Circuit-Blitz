@@ -25,7 +25,7 @@ public class UsernameSelectionUI : MonoBehaviour
                 GameOptionsUI.gameObject.SetActive(true);
             }
             
-            GameManager.Instance.SetUsernameRpc(NetworkManager.Singleton.LocalClientId, nameField.text);
+            ServerManager.Instance.SetUsernameRpc(NetworkManager.Singleton.LocalClientId, nameField.text);
         });
     }
 }

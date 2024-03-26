@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7518156943440680336
+--- !u!1 &4250212640821908777
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,44 +8,44 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1908804633053168872}
-  - component: {fileID: 1444845979842465607}
-  - component: {fileID: 493345328425342081}
+  - component: {fileID: 1937335699597789964}
+  - component: {fileID: 3417670446736684330}
+  - component: {fileID: 1001464893985824331}
   m_Layer: 0
-  m_Name: GameManager
+  m_Name: ServerManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1908804633053168872
+--- !u!4 &1937335699597789964
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7518156943440680336}
+  m_GameObject: {fileID: 4250212640821908777}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -651.38104, y: -129.86395, z: 429.70715}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1444845979842465607
+--- !u!114 &3417670446736684330
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7518156943440680336}
+  m_GameObject: {fileID: 4250212640821908777}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 10641604
+  GlobalObjectIdHash: 2453282394
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 0
@@ -54,18 +54,19 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
---- !u!114 &493345328425342081
+--- !u!114 &1001464893985824331
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7518156943440680336}
+  m_GameObject: {fileID: 4250212640821908777}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce64be9d33b4b4e96b851a3848f8fb11, type: 3}
+  m_Script: {fileID: 11500000, guid: 7ff8081b1f8824c58824e87303f8d50a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RacecarPrefab: {fileID: 5160246789347131790, guid: 90a2926c9d379694292f238a14b6388c, type: 3}
-  SpawnPads: {fileID: 0}
-  Checkpoints: {fileID: 0}
+  MapName: 
+  PlayerList:
+    keys: 
+    values: []

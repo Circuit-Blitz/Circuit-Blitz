@@ -14,7 +14,7 @@ public class GameOptionsUI : MonoBehaviour
     private void Awake()
     {
         StartGameBtn.onClick.AddListener(() => {
-            GameManager.Instance.StartGame();
+            ServerManager.Instance.StartGame();
         });
         
         UpdatePlayerList();
@@ -32,7 +32,7 @@ public class GameOptionsUI : MonoBehaviour
         // Use DetachChildren to ensure that childCount is 0
         PlayerList.DetachChildren();
 
-        foreach (KeyValuePair<ulong, String> kv in GameManager.Instance.getPlayerListIterator()) {
+        foreach (KeyValuePair<ulong, string> kv in ServerManager.Instance.GetPlayerListIterator()) {
             AddPlayer(kv.Key);
         }
     }
@@ -47,10 +47,10 @@ public class GameOptionsUI : MonoBehaviour
         tag.offsetMin = new Vector2(0, 0);
         tag.offsetMax = new Vector2(0, (PlayerList.childCount - 1) * -100 - 80);
         tag.sizeDelta = new Vector2(0, 50);
-        tag.GetComponent<Text>().text = GameManager.Instance.getPlayerUsername(playerId);
+        tag.GetComponent<Text>().text = ServerManager.Instance.GetPlayerUsername(playerId);
     }
 
-    public void SetUsername(ulong playerId, String username) {
+    public void SetUsername(ulong playerId, string username) {
         PlayerList.Find(playerId.ToString()).GetComponent<Text>().text = username;
     }
 }

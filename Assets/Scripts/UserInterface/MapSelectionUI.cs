@@ -14,7 +14,7 @@ public class MapSelectionUI : MonoBehaviour
             btn.onClick.AddListener(() => {
                 gameObject.SetActive(false);
                 GameOptions.gameObject.SetActive(true);
-                GameManager.Instance.SetMap("Scenes/Tracks/" + btn.name);
+                ServerManager.Instance.SetMap("Scenes/Tracks/" + btn.name);
             });
         }
     }

@@ -1,161 +1,65 @@
-using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class GameManager : NetworkBehaviour
 {
     private static GameManager _instance;
     public static GameManager Instance {
         get {
-            if(_instance is null)
+            if(_instance == null)
                 Debug.LogError("Game Manager is NULL");
             return _instance;
         }
     }
-
-    [SerializeField] private Transform PlayerPrefab;
-    [SerializeField] private String mapName;
-    [SerializeField] private UDictionary<ulong, String> players = new UDictionary<ulong, string>();
     
-    public override void OnNetworkSpawn() {
-        // Event when new player joins
-        NetworkManager.Singleton.OnConnectionEvent += onConnectionEvent;
-
-        if (IsServer) {
-            // Event when the scene manager loads a new scene
-            NetworkManager.SceneManager.OnSceneEvent += SceneManager_OnSceneEvent;
-        }
-    }
+    [SerializeField] private Transform RacecarPrefab;
+    public List<Transform> SpawnPads;
+    public List<Transform> Checkpoints;
+    private Transform LocalPlayer;
 
     void Awake() {
         // Set the global instance
         _instance = this;
-        // Don't destroy this GameObject when a scene is loaded
-        DontDestroyOnLoad(this);
-    }
-    
-    public void SetMap(String mapName) {
-        this.mapName = mapName;
     }
 
-    public void onConnectionEvent(NetworkManager manager, ConnectionEventData data) {
-        switch (data.EventType)
-        {
-            case ConnectionEvent.ClientConnected: {
-                if (manager.IsServer && !players.ContainsKey(data.ClientId)) {
-                    // Replicate adding the player to everyone
-                    AddPlayerRpc(data.ClientId, "Player", RpcTarget.Everyone);
-
-                    // Sync current player list with new player
-                    foreach (KeyValuePair<ulong, String> kv in players)
-                    {
-                        AddPlayerRpc(kv.Key, kv.Value, RpcTarget.Single(data.ClientId, RpcTargetUse.Temp));
-                    }
-
-                    // If we are in the main menu, then sync Player List (User Interface)
-                    if (SceneManager.GetActiveScene().name == "MainMenu") {
-                        UpdatePlayerListUIRpc();
-                    }
-                }
-
-                break;
-            }
-            case ConnectionEvent.ClientDisconnected: {
-                // Replicate adding the player to everyone
-                RemovePlayerRpc(data.ClientId, RpcTarget.Everyone);
-
-                // If we are in the main menu, then sync Player List (User Interface)
-                if (SceneManager.GetActiveScene().name == "MainMenu") {
-                    UpdatePlayerListUIRpc();
-                }
-                
-                break;
-            }
-        }
-    }
-    
-    [Rpc(SendTo.Everyone)]
-    public void UpdatePlayerListUIRpc() {
-        if (GameObject.Find("UserInterface/GameOptions")) {
-            GameObject.Find("UserInterface/GameOptions").GetComponent<GameOptionsUI>().UpdatePlayerList();
-        }
-    }
-
-    [Rpc(SendTo.SpecifiedInParams)]
-    public void AddPlayerRpc(ulong playerId, String username, RpcParams rpcParams) {
-        if (!players.ContainsKey(playerId)) {
-            players.Add(playerId, username);
-        }
-    }
-
-    [Rpc(SendTo.SpecifiedInParams)]
-    public void RemovePlayerRpc(ulong playerId, RpcParams rpcParams) {
-        if (players.ContainsKey(playerId)) {
-            players.Remove(playerId);
-        }
-    }
-
-    [Rpc(SendTo.Everyone)]
-    public void SetUsernameRpc(ulong playerId, String newUsername) {
-        if (players.ContainsKey(playerId)) {
-            players[playerId] = newUsername;
-        }
-        // Changes the username in the playerlist
-        if (SceneManager.GetActiveScene().name == "MainMenu" &&
-            GameObject.Find("UserInterface/GameOptions"))
-        {
-            GameObject.Find("UserInterface/GameOptions").GetComponent<GameOptionsUI>().SetUsername(playerId, newUsername);
-        }
-    }
-
-    public void printPlayerList() {
-        foreach (KeyValuePair<ulong, String> kv in getPlayerListIterator())
-        {
-            Debug.LogError(kv.Key + " : " + kv.Value);
-        }
-    }
-
-    public void StartGame() {
-        NetworkManager.SceneManager.LoadScene(this.mapName, LoadSceneMode.Single);
-    }
-    
-    public String getPlayerUsername(ulong playerId) {
-        return players[playerId];
-    }
-
-    public IEnumerable<KeyValuePair<ulong, String>> getPlayerListIterator() {
-        foreach (KeyValuePair<ulong, String> kv in players)
-        {
-            yield return kv;
-        }
-    }
-
-    private void SceneManager_OnSceneEvent(SceneEvent sceneEvent) {
-        switch (sceneEvent.SceneEventType) {
-            case SceneEventType.LoadComplete:
-            {
-                if (sceneEvent.ClientId == NetworkManager.ServerClientId)
-                {
-                    // Spawn the car for players when the scene is loaded
-                    StartGameRpc();
-                }
-                break;
-            }
-        }
-    }
-
-    [Rpc(SendTo.Everyone)]
-    public void StartGameRpc() {
-        SpawnCarRpc(NetworkManager.LocalClientId);
+    public override void OnNetworkSpawn() {
+        // Spawn every player's car
+        SpawnPlayerRpc(NetworkManager.LocalClientId);
     }
     
     [Rpc(SendTo.Server)]
-    void SpawnCarRpc(ulong playerId) {
-        // Instantiate on server
-        Transform Player = Instantiate(PlayerPrefab);
+    public void SpawnPlayerRpc(ulong playerId) {
+        // Do not spawn this player if the id does not exist in the player list
+        if (!ServerManager.Instance.ContainsPlayer(playerId)) return;
+
+        // Get a random pad to set the player's position to
+        // Set the prefab's position to the pad's position so that interpolation doesn't mess up anything
+        // Offset spawn's position upwards so that car does not clip into the ground
+        int randInt = Random.Range(0, SpawnPads.Count);
+        Transform Pad = SpawnPads[randInt];
+        Vector3 spawnPos = Pad.position + Vector3.up * 4;
+        RacecarPrefab.position = spawnPos;
+
+        // Instantiate a new racecar as the player with ownership being given to the id
+        Transform Player = Instantiate(RacecarPrefab);
         Player.GetComponent<NetworkObject>().SpawnWithOwnership(playerId);
+        
+        // Set the player's position to the random pad
+        SetPositionOfPlayerRpc(spawnPos, RpcTarget.Single(playerId, RpcTargetUse.Temp));
+        SpawnPads.RemoveAt(randInt);
+    }
+
+    public void SetLocalPlayer(Transform player) {
+        LocalPlayer = player;
+    }
+
+    [Rpc(SendTo.SpecifiedInParams)]
+    public void SetPositionOfPlayerRpc(Vector3 pos, RpcParams rpcParams) {
+        // Set the player's position to the new position
+        // Use rigidbody because it's what actually dictates the car's position
+        LocalPlayer.GetComponent<Rigidbody>().position = pos;
     }
 }

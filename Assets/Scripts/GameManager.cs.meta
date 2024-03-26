@@ -1,10 +1,9 @@
 fileFormatVersion: 2
-guid: 7ff8081b1f8824c58824e87303f8d50a
+guid: ce64be9d33b4b4e96b851a3848f8fb11
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences:
-  - GameCameraPrefab: {instanceID: 0}
+  defaultReferences: []
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
