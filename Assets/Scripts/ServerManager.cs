@@ -7,10 +7,10 @@ using UnityEngine.SceneManagement;
 public class ServerManager : NetworkBehaviour
 {
     private static ServerManager _instance;
-    public static ServerManager Instance {
-        get {
-            if(_instance == null)
-                Debug.LogError("Server Manager is NULL");
+    public static ServerManager Instance
+    {
+        get
+        {
             return _instance;
         }
     }
@@ -21,6 +21,10 @@ public class ServerManager : NetworkBehaviour
     public override void OnNetworkSpawn() {
         // Event when new player joins
         NetworkManager.Singleton.OnConnectionEvent += OnConnectionEvent;
+        // Event when the server shuts down
+        NetworkManager.Singleton.OnServerStopped += OnServerStopped;
+        // Event when the local client stops
+        NetworkManager.Singleton.OnClientStopped += OnClientStopped;
     }
 
     void Awake() {
@@ -32,6 +36,24 @@ public class ServerManager : NetworkBehaviour
     
     public void SetMap(string mapName) {
         this.MapName = mapName;
+    }
+    
+    public void ClearPlayerList() {
+        PlayerList.Clear();
+        UpdatePlayerListUIRpc();
+    }
+
+    void OnClientStopped(bool _)
+    {
+        // Return back to the main menu
+        SceneManager.LoadScene("Scenes/MainMenu");
+        // Clear any leftover players from the player list
+        ServerManager.Instance.ClearPlayerList();
+    }
+
+    public void OnServerStopped(bool _) {
+        // Clear any leftover players from the player list
+        ClearPlayerList();
     }
 
     public void OnConnectionEvent(NetworkManager manager, ConnectionEventData data) {
@@ -57,14 +79,13 @@ public class ServerManager : NetworkBehaviour
                 break;
             }
             case ConnectionEvent.ClientDisconnected: {
-                // Replicate adding the player to everyone
+                // Replicate removing the player to everyone
                 RemovePlayerRpc(data.ClientId, RpcTarget.Everyone);
 
                 // If we are in the main menu, then sync Player List (User Interface)
                 if (SceneManager.GetActiveScene().name == "MainMenu") {
                     UpdatePlayerListUIRpc();
                 }
-                
                 break;
             }
         }

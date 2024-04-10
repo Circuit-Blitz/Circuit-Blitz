@@ -1,22 +1,28 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameUIManager : MonoBehaviour
 {
     private static GameUIManager _instance;
-    public static GameUIManager Instance {
-        get {
-            if(_instance == null)
-                Debug.LogError("Game Manager is NULL");
+    public static GameUIManager Instance
+    {
+        get
+        {
             return _instance;
         }
     }
 
+    [SerializeField] private RectTransform countdown;
+
     void Awake() {
         // Set the global instance
         _instance = this;
+        // Hide the countdown
+        countdown.gameObject.SetActive(false);
     }
     
     void Start() {
@@ -31,6 +37,9 @@ public class GameUIManager : MonoBehaviour
                 case NetworkListEvent<ulong>.EventType.Add: {
                     ulong playerId = changeEvent.Value;
                     string text = changeEvent.Index + 1 + ": " + ServerManager.Instance.GetPlayerUsername(playerId);
+                    if (GameManager.Instance.didPlayerClear(playerId)) {
+                        text += " ~ " + GameManager.Instance.getPlayerClearTime(playerId).ToString("F1");
+                    }
                     placements.AddText(playerId.ToString(), text);
                     break;
                 }
@@ -49,6 +58,18 @@ public class GameUIManager : MonoBehaviour
             placements.AddText(playerId.ToString(), ++counter + ": " + username);
         }
     }
-    
+
+    public IEnumerator StartCountdown(uint seconds) {
+        // Show the countdown
+        countdown.gameObject.SetActive(true);
+        for (int i = 0; i < seconds; i++)
+        {
+            countdown.GetComponent<TMP_Text>().text = (seconds - i).ToString();
+            yield return new WaitForSeconds(1);
+        }
+        // Hide the countdown
+        countdown.gameObject.SetActive(false);
+    }
+
     [SerializeField] private ScrollableTextList placements;
 }

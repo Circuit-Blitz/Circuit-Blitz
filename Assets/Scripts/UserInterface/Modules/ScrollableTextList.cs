@@ -29,6 +29,9 @@ public class ScrollableTextList : MonoBehaviour
         tag.offsetMax = new Vector2(0, (RT.childCount - 1) * -100 - 80);
         tag.sizeDelta = new Vector2(0, 50);
         tag.GetComponent<Text>().text = text;
+        
+        // The scale may change for some reason, set it back to 1, 1, 1
+        tag.localScale = new Vector3(1, 1, 1);
     }
 
     public void SetText(string tagName, string text) {
