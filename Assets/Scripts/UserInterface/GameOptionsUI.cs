@@ -9,8 +9,7 @@ using UnityEngine.UI;
 public class GameOptionsUI : MonoBehaviour
 {
     [SerializeField] private Button StartGameBtn;
-    [SerializeField] private RectTransform PlayerList;
-    [SerializeField] private RectTransform UsernameTag;
+    [SerializeField] private ScrollableTextList UsernameList;
     private void Awake()
     {
         StartGameBtn.onClick.AddListener(() => {
@@ -22,35 +21,14 @@ public class GameOptionsUI : MonoBehaviour
 
     public void UpdatePlayerList()
     {
-        // Loop through and destroy all children (O_o)
-        foreach (Transform child in PlayerList.transform)
-        {
-            Destroy(child.gameObject);
-        }
-
-        // Destroy is deferred to the end of the frame
-        // Use DetachChildren to ensure that childCount is 0
-        PlayerList.DetachChildren();
+        UsernameList.Clear();
 
         foreach (KeyValuePair<ulong, string> kv in ServerManager.Instance.GetPlayerListIterator()) {
-            AddPlayer(kv.Key);
+            UsernameList.AddText(kv.Key.ToString(), kv.Value);
         }
-    }
-
-    private void AddPlayer(ulong playerId) {
-        RectTransform tag = Instantiate(UsernameTag);
-        tag.transform.SetParent(PlayerList);
-        tag.name = playerId.ToString();
-
-        PlayerList.sizeDelta = new Vector2(PlayerList.sizeDelta.x, PlayerList.childCount * 50 + 30);
-
-        tag.offsetMin = new Vector2(0, 0);
-        tag.offsetMax = new Vector2(0, (PlayerList.childCount - 1) * -100 - 80);
-        tag.sizeDelta = new Vector2(0, 50);
-        tag.GetComponent<Text>().text = ServerManager.Instance.GetPlayerUsername(playerId);
     }
 
     public void SetUsername(ulong playerId, string username) {
-        PlayerList.Find(playerId.ToString()).GetComponent<Text>().text = username;
+        UsernameList.SetText(playerId.ToString(), username);
     }
 }

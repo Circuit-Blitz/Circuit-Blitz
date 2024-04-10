@@ -39,6 +39,9 @@ public class CarController : NetworkBehaviour
         // Only the local player should run this code
         if (!IsOwner) return;
 
+        // Can only move the car once the game is started
+        if (!GameManager.Instance.isGameStarted()) return;
+
         // Sync transform with Rigidbody
         transform.rotation = RB.rotation;
         transform.position = RB.position;

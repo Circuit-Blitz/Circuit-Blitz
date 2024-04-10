@@ -89,6 +89,11 @@ public class ServerManager : NetworkBehaviour
         if (PlayerList.ContainsKey(playerId)) {
             PlayerList.Remove(playerId);
         }
+        
+        // Let the game manager know if a player disconnected
+        if (GameManager.Instance) {
+            GameManager.Instance.PlayerDisconnected(playerId);
+        }
     }
 
     [Rpc(SendTo.Everyone)]
