@@ -12,10 +12,17 @@ public class GameOptionsUI : MonoBehaviour
     [SerializeField] private ScrollableTextList UsernameList;
     private void Awake()
     {
-        StartGameBtn.onClick.AddListener(() => {
-            ServerManager.Instance.StartGame();
-        });
-        
+        // Disable the start game button if not server
+        if (NetworkManager.Singleton.IsServer) {
+            StartGameBtn.gameObject.SetActive(true);
+            StartGameBtn.onClick.AddListener(() =>
+            {
+                ServerManager.Instance.StartGame();
+            });
+        } else {
+            StartGameBtn.gameObject.SetActive(false);
+        }
+
         UpdatePlayerList();
     }
 
