@@ -51,24 +51,13 @@ public class NetworkManagerUI : MonoBehaviour
         // Set whether the host or the connect button should be on based on ClientOrHost
         Options2HostBtn.gameObject.SetActive(ClientOrHost == "Host");
         Options2ConnectBtn.gameObject.SetActive(ClientOrHost == "Client");
-    }
-
-    public bool ValidateIPv4(string ipString)
-    {
-        if (String.IsNullOrEmpty(ipString))
-        {
-            return false;
+        // If we are hosting, then the default listening address is "0.0.0.0"
+        // If we are connecting, then the default connecting address is "127.0.0.1"
+        if (ClientOrHost == "Host") {
+            Options2AddressInput.text = "0.0.0.0";
+        } else if (ClientOrHost == "Client") {
+            Options2AddressInput.text = "127.0.0.1";
         }
- 
-        string[] splitValues = ipString.Split('.');
-        if (splitValues.Length != 4)
-        {
-            return false;
-        }
- 
-        byte tempForParsing;
- 
-        return splitValues.All(r => byte.TryParse(r, out tempForParsing));
     }
 
     private void OnEnable() {
@@ -97,17 +86,13 @@ public class NetworkManagerUI : MonoBehaviour
             Options1.gameObject.SetActive(true);
             Options2.gameObject.SetActive(false);
         });
-
         Options2HostBtn.onClick.AddListener(() => {
-            if (!ValidateIPv4(Options2AddressInput.text)) return;  // TODO: Give error
             InitialiseTransport(Options2AddressInput.text, int.Parse(Options2PortInput.text));
             if (NetworkManager.Singleton.StartHost()) {
                 MoveToUsernameSelection();
             }
         });
-
         Options2ConnectBtn.onClick.AddListener(() => {
-            if (!ValidateIPv4(Options2AddressInput.text)) return;  // TODO: Give error
             InitialiseTransport(Options2AddressInput.text, int.Parse(Options2PortInput.text));
             if (NetworkManager.Singleton.StartClient()) {
                 MoveToUsernameSelection();
