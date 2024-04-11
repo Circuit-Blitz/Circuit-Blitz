@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
+using System.IO.Ports;
 
 public class CarController : NetworkBehaviour
 {
@@ -19,6 +20,9 @@ public class CarController : NetworkBehaviour
     private bool grounded;
     private Transform PlayerCamera;
 
+    // Serial port
+    SerialPort serialPort = new SerialPort("COM5", 9600);
+    
     // Start is called before the first frame update
     public override void OnNetworkSpawn()
     {
@@ -31,6 +35,9 @@ public class CarController : NetworkBehaviour
         // Instantiate a Camera to follow player
         PlayerCamera = Instantiate(PlayerCameraPrefab);
         PlayerCamera.GetComponent<CameraController>().Player = transform;
+
+        // Open the serial port
+        serialPort.Open();
     }
 
     private void Update() {
@@ -57,7 +64,14 @@ public class CarController : NetworkBehaviour
         }
 
         // Determine the turn based on input
-        turnInput = Input.GetAxis("Horizontal");
+        // turnInput = Input.GetAxis("Horizontal");
+        
+        // Read data from the serial port
+        string data = serialPort.ReadLine();
+        float valueFromArduino = float.Parse(data);
+        print(valueFromArduino);
+
+        turnInput = valueFromArduino;
     }
 
     private void FixedUpdate()
