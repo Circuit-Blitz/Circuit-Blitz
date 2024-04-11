@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
+using System.IO;
 using System.IO.Ports;
 
 public class CarController : NetworkBehaviour
@@ -21,7 +22,7 @@ public class CarController : NetworkBehaviour
     private Transform PlayerCamera;
 
     // Serial port
-    SerialPort serialPort = new SerialPort("COM5", 9600);
+    SerialPort serialPort;
 
     // Start is called before the first frame update
     public override void OnNetworkSpawn()
@@ -36,8 +37,17 @@ public class CarController : NetworkBehaviour
         PlayerCamera = Instantiate(PlayerCameraPrefab);
         PlayerCamera.GetComponent<CameraController>().Player = transform;
 
-        // Open the serial port
-        serialPort.Open();
+        // Attempt to open the serial port
+        try 
+        {
+            // Open the serial port
+            serialPort = new SerialPort("COM5", 9600);
+            serialPort.Open();
+        }
+        catch (IOException e)
+        {
+            Debug.LogError("Serial Port no open: " + e.Message);
+        }
     }
 
     private void Update() {
@@ -66,11 +76,17 @@ public class CarController : NetworkBehaviour
         // Determine the turn based on input
         // turnInput = Input.GetAxis("Horizontal");
         
-        // Read data from the serial port
-        string data = serialPort.ReadLine();
-        string[] values = data.Split(',');
+        if (serialPort.IsOpen) {
+            // Read data from the serial port
+            string data = serialPort.ReadLine();
+            string[] values = data.Split(',');
 
-        joyStickYValue = float.Parse(values[1]);
+            joyStickYValue = float.Parse(values[1]);
+            turnInput = -1 * float.Parse(values[0]); // Set the turn input
+        } else {
+            joyStickYValue = Input.GetAxis("Vertical");
+            turnInput = Input.GetAxis("Horizontal");
+        }
 
         // Determine the speed based on joystick input
         speedInput = 0f;
@@ -79,8 +95,6 @@ public class CarController : NetworkBehaviour
         } else if (joyStickYValue < 0) {
             speedInput = joyStickYValue * reverseAccel * 1000f;
         }
-
-        turnInput = -1 * float.Parse(values[0]); // Set the turn input
 
     }
 
