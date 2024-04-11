@@ -23,13 +23,15 @@ void setOffset() {
 }
 
 const float angle_threshold = 5.0;
-const float scaling_factor = 0.1; 
+const float scaling_factor = 0.1;
+const int joystickY = A0;
 
 void setup() {
   Wire.begin();
   Serial.begin(9600);
 
   mpu.initialize();
+  pinMode(joystickY, INPUT);
   
   // set the calibration offsets
   setOffset();
@@ -56,7 +58,12 @@ void loop() {
   // ensure mapped value is within [-1, 1] range
   mapped_value = max(-1.0f, min(1.0f, mapped_value));
 
-  Serial.println(mapped_value);
+  // map value between [-1, 1]
+  float joyStickYValue = map(analogRead(joystickY) + 4, 0, 1023, 100, -100) / 100.0;
+
+  String data = String(mapped_value) + "," + String(joyStickYValue);
+
+  Serial.println(data);
 
   delay(20);
 }
