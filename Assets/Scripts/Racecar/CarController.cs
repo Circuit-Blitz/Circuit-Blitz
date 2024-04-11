@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -40,7 +38,7 @@ public class CarController : NetworkBehaviour
         if (!IsOwner) return;
 
         // Can only move the car once the game is started
-        if (!GameManager.Instance.isGameStarted()) return;
+        if (!GameManager.Instance.DidGameStart()) return;
 
         // Sync transform with Rigidbody
         transform.rotation = RB.rotation;

@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 61959820}
   - component: {fileID: 61959819}
   m_Layer: 5
-  m_Name: InputField (TMP)
+  m_Name: NameField
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -827,7 +827,7 @@ GameObject:
   - component: {fileID: 294578597}
   - component: {fileID: 294578596}
   m_Layer: 5
-  m_Name: RawImage
+  m_Name: BackgroundImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2574,7 +2574,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b598c89931614739a6f847f3466aea0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapBtns:
+  MapBtns:
   - {fileID: 544767321}
   GameOptions: {fileID: 1672093651}
 --- !u!1 &880614057
@@ -2627,8 +2627,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ce427909922f244c8e86df6f48d8939, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nextBtn: {fileID: 948952970}
-  nameField: {fileID: 61959819}
+  NextBtn: {fileID: 948952970}
+  NameField: {fileID: 61959819}
   MapSelectionUI: {fileID: 864189078}
   GameOptionsUI: {fileID: 1672093651}
 --- !u!1 &893629871
@@ -4687,7 +4687,7 @@ GameObject:
   - component: {fileID: 1464597225}
   - component: {fileID: 1464597228}
   m_Layer: 5
-  m_Name: Scroll View
+  m_Name: PlayerList
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

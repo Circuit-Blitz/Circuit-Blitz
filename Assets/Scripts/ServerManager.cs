@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -35,7 +35,7 @@ public class ServerManager : NetworkBehaviour
     }
     
     public void SetMap(string mapName) {
-        this.MapName = mapName;
+        MapName = mapName;
     }
     
     public void ClearPlayerList() {
@@ -90,7 +90,7 @@ public class ServerManager : NetworkBehaviour
             }
         }
     }
-    
+
     [Rpc(SendTo.Everyone)]
     public void UpdatePlayerListUIRpc() {
         if (GameObject.Find("UserInterface/GameOptions")) {
@@ -138,7 +138,7 @@ public class ServerManager : NetworkBehaviour
     }
 
     public void StartGame() {
-        NetworkManager.SceneManager.LoadScene(this.MapName, LoadSceneMode.Single);
+        NetworkManager.Singleton.SceneManager.LoadScene(MapName, LoadSceneMode.Single);
     }
 
     public string GetPlayerUsername(ulong playerId) {
@@ -147,6 +147,14 @@ public class ServerManager : NetworkBehaviour
     
     public bool ContainsPlayer(ulong playerId) {
         return PlayerList.ContainsKey(playerId);
+    }
+
+    public List<ulong> GetConnectedPlayerIds() {
+        return PlayerList.Keys.ToList();
+    }
+
+    public List<string> GetConnectedPlayerUsernames() {
+        return PlayerList.Values.ToList();
     }
 
     public IEnumerable<KeyValuePair<ulong, string>> GetPlayerListIterator() {

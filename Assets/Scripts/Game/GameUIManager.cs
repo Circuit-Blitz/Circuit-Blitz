@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class GameUIManager : MonoBehaviour
 {
@@ -16,18 +15,18 @@ public class GameUIManager : MonoBehaviour
         }
     }
 
-    [SerializeField] private RectTransform countdown;
+    [SerializeField] private RectTransform Countdown;
 
     void Awake() {
         // Set the global instance
         _instance = this;
         // Hide the countdown
-        countdown.gameObject.SetActive(false);
+        Countdown.gameObject.SetActive(false);
     }
     
     void Start() {
         // Update placements when it changes
-        GameManager.Instance.getPlacements().OnListChanged += (NetworkListEvent<ulong> changeEvent) => {
+        GameManager.Instance.GetPlacements().OnListChanged += (NetworkListEvent<ulong> changeEvent) => {
             switch (changeEvent.Type)
             {
                 case NetworkListEvent<ulong>.EventType.Clear: {
@@ -37,8 +36,8 @@ public class GameUIManager : MonoBehaviour
                 case NetworkListEvent<ulong>.EventType.Add: {
                     ulong playerId = changeEvent.Value;
                     string text = changeEvent.Index + 1 + ": " + ServerManager.Instance.GetPlayerUsername(playerId);
-                    if (GameManager.Instance.didPlayerClear(playerId)) {
-                        text += " ~ " + GameManager.Instance.getPlayerClearTime(playerId).ToString("F1");
+                    if (GameManager.Instance.DidPlayerClear(playerId)) {
+                        text += " ~ " + GameManager.Instance.GetPlayerClearTime(playerId).ToString("F1");
                     }
                     placements.AddText(playerId.ToString(), text);
                     break;
@@ -61,14 +60,14 @@ public class GameUIManager : MonoBehaviour
 
     public IEnumerator StartCountdown(uint seconds) {
         // Show the countdown
-        countdown.gameObject.SetActive(true);
+        Countdown.gameObject.SetActive(true);
         for (int i = 0; i < seconds; i++)
         {
-            countdown.GetComponent<TMP_Text>().text = (seconds - i).ToString();
+            Countdown.GetComponent<TMP_Text>().text = (seconds - i).ToString();
             yield return new WaitForSeconds(1);
         }
         // Hide the countdown
-        countdown.gameObject.SetActive(false);
+        Countdown.gameObject.SetActive(false);
     }
 
     [SerializeField] private ScrollableTextList placements;

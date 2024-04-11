@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class GameManager : NetworkBehaviour
 {
@@ -22,49 +21,61 @@ public class GameManager : NetworkBehaviour
     private Transform LocalPlayer;
     
     public struct GameState : INetworkSerializable {
-        public bool _started;
         public double _startTime;
+        public bool _started;
+        public bool _ended;
         
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
-            serializer.SerializeValue(ref _started);
             serializer.SerializeValue(ref _startTime);
+            serializer.SerializeValue(ref _started);
+            serializer.SerializeValue(ref _ended);
         }
     }
-    private NetworkVariable<GameState> gameState = new NetworkVariable<GameState>(new GameState {
+    private readonly NetworkVariable<GameState> CurrentGameState = new(new GameState {
         _started = false,
+        _ended = false,
     }, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
-    [SerializeField] private NetworkList<ulong> placements;
+    [SerializeField] private NetworkList<ulong> Placements;
     
-    [SerializeField] private UDictionary<ulong, int> ServerCurrentCheckpoints = new UDictionary<ulong, int>();
-    
-    [SerializeField] private UDictionary<ulong, Transform> ServerPlayerTransforms = new UDictionary<ulong, Transform>();
-
-    [SerializeField] private UDictionary<ulong, double> ServerClearTimes = new UDictionary<ulong, double>();
+    [SerializeField] private UDictionary<ulong, int> ServerCurrentCheckpoints = new();
+    [SerializeField] private UDictionary<ulong, Transform> ServerPlayerTransforms = new();
+    [SerializeField] private UDictionary<ulong, double> ServerClearTimes = new();
     
     [SerializeField] private int LocalCurrentCheckpoint;
-    [SerializeField] private UDictionary<ulong, double> LocalClearTimes = new UDictionary<ulong, double>();
+    [SerializeField] private UDictionary<ulong, double> LocalClearTimes = new();
 
-    private double startTime {
+    private double StartTime {
         get {
-            return gameState.Value._startTime;
+            return CurrentGameState.Value._startTime;
         }
         set {
-            GameState newState = gameState.Value;
+            GameState newState = CurrentGameState.Value;
             newState._startTime = value;
-            gameState.Value = newState;
+            CurrentGameState.Value = newState;
         }
     }
 
-    private bool gameStarted {
+    private bool GameStarted {
         get {
-            return gameState.Value._started;
+            return CurrentGameState.Value._started;
         }
         set {
-            GameState newState = gameState.Value;
+            GameState newState = CurrentGameState.Value;
             newState._started = value;
-            gameState.Value = newState;
+            CurrentGameState.Value = newState;
+        }
+    }
+
+    private bool GameEnded {
+        get {
+            return CurrentGameState.Value._ended;
+        }
+        set {
+            GameState newState = CurrentGameState.Value;
+            newState._ended = value;
+            CurrentGameState.Value = newState;
         }
     }
 
@@ -73,37 +84,40 @@ public class GameManager : NetworkBehaviour
         _instance = this;
 
         // Initialize placements
-        placements = new NetworkList<ulong>(
+        Placements = new NetworkList<ulong>(
             new List<ulong>(),
             NetworkVariableReadPermission.Everyone,
             NetworkVariableWritePermission.Server
         );
     }
 
-    public NetworkList<ulong> getPlacements() {
-        return placements;
+    public NetworkList<ulong> GetPlacements() {
+        return Placements;
     }
 
-    public bool isGameStarted() {
-        return gameStarted;
+    public bool DidGameEnd() {
+        return GameEnded;
     }
 
-    public bool didPlayerClear(ulong playerId) {
+    public bool DidGameStart() {
+        return GameStarted;
+    }
+
+    public bool DidPlayerClear(ulong playerId) {
         return LocalClearTimes.ContainsKey(playerId);
     }
 
-    public double getPlayerClearTime(ulong playerId) {
-        double clearTime = -1;
-        LocalClearTimes.TryGetValue(playerId, out clearTime);
+    public double GetPlayerClearTime(ulong playerId) {
+        LocalClearTimes.TryGetValue(playerId, out double clearTime);
         return clearTime;
     }
     
-    private void updatePlacements() {
+    private void UpdatePlacements() {
         // Only the server is allowed to write to placements (NetworkList)
         if (!IsServer) return;
 
         // Update the placements
-        placements.Clear();
+        Placements.Clear();
         List<ulong> newPlacements = ServerCurrentCheckpoints.Keys.OrderByDescending(playerId => {
             // If the player has cleared it, then they are at the top
             // and are compared with other players who have also cleared it
@@ -116,22 +130,20 @@ public class GameManager : NetworkBehaviour
         }).ToList();
         foreach (ulong _playerId in newPlacements)
         {
-            placements.Add(_playerId);
+            Placements.Add(_playerId);
         }
     }
     
     [Rpc(SendTo.Everyone)]
-    private void playerFinishedRpc(ulong playerId, double clearTime) {
+    private void PlayerFinishedRpc(ulong playerId, double clearTime) {
         LocalClearTimes[playerId] = clearTime;
     }
 
-    private void updateCheckpointsCollectedLocal() {
+    private void UpdateCheckpointsCollectedLocal() {
         // LocalPlayer could be destroyed or null
         if (!LocalPlayer) return;
         // Get local player's position
         Vector3 pos = LocalPlayer.position;
-        // Player id is local player's
-        ulong playerId = NetworkManager.Singleton.LocalClientId;
         // Don't go out of bounds
         if (LocalCurrentCheckpoint >= Checkpoints.childCount) return;
         // Get the next checkpoint's collider
@@ -152,7 +164,7 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    private void updateCheckpointCollectedServer(ulong playerId, Vector3 pos) {
+    private void UpdateCheckpointCollectedServer(ulong playerId, Vector3 pos) {
         // Only the server is allowed to run this
         if (!IsServer) return;
         // Don't go out of bounds
@@ -167,23 +179,21 @@ public class GameManager : NetworkBehaviour
             ServerCurrentCheckpoints[playerId]++;
             // Player has cleared the stage
             if (ServerCurrentCheckpoints[playerId] == Checkpoints.childCount) {
-                ServerClearTimes.Add(playerId, Time.timeAsDouble - startTime);
-                playerFinishedRpc(playerId, ServerClearTimes[playerId]);
-                
-                // If all players connected to the server right now has cleared the track
-                // Then return all players to the main lobby
-                if (NetworkManager.ConnectedClientsIds.All(playerId => ServerClearTimes.Keys.Contains(playerId))) {
-                    ReturnToLobbyRpc();
-                }
+                ServerClearTimes.Add(playerId, Time.timeAsDouble - StartTime);
+                PlayerFinishedRpc(playerId, ServerClearTimes[playerId]);
+
+                // Check if the current game has ended
+                // If it did, then return all players back to the main menu
+                TryEndGame();
             }
             // Only the server runs this
-            updatePlacements();
+            UpdatePlacements();
         }
     }
 
     private void Update() {
         // Update checkpoints for local
-        updateCheckpointsCollectedLocal();
+        UpdateCheckpointsCollectedLocal();
 
         // Server time >:)
         if (!IsServer) return;
@@ -196,10 +206,20 @@ public class GameManager : NetworkBehaviour
             Transform playerTransform = player.Value;
             if (!playerTransform) continue;
 
-            updateCheckpointCollectedServer(playerId, playerTransform.position);
+            UpdateCheckpointCollectedServer(playerId, playerTransform.position);
         }
     }
 
+    private void TryEndGame() {
+        // Game has already ended, do nothing
+        if (DidGameEnd()) return;
+        // If all players connected to the server right now has cleared the track
+        // Then the game has ended, return all players to the main lobby
+        if (ServerManager.Instance.GetConnectedPlayerIds().All(playerId => ServerClearTimes.Keys.Contains(playerId))) {
+            GameEnded = true;
+            ReturnToLobbyRpc();
+        }
+    }
 
     [Rpc(SendTo.Everyone)]
     private void ReturnToLobbyRpc()
@@ -230,7 +250,7 @@ public class GameManager : NetworkBehaviour
     IEnumerator StartGame()
     {
         // Initialize numCheckpointsCollected
-        foreach(ulong playerId in NetworkManager.Singleton.ConnectedClientsIds)
+        foreach(ulong playerId in ServerManager.Instance.GetConnectedPlayerIds())
         {
             ServerCurrentCheckpoints.Add(playerId, 0);
         }
@@ -256,16 +276,16 @@ public class GameManager : NetworkBehaviour
             yield return new WaitForSeconds(seconds);
 
             // Start the game
-            gameStarted = true;
+            GameStarted = true;
             
             // Set the start timestamp
-            startTime = Time.timeAsDouble;
+            StartTime = Time.timeAsDouble;
         }
     }
 
     public override void OnNetworkSpawn() {
         // Spawn every player's car
-        SpawnPlayerRpc(NetworkManager.LocalClientId);
+        SpawnPlayerRpc(NetworkManager.Singleton.LocalClientId);
         // Start the game
         StartCoroutine(StartGame());
     }
@@ -305,8 +325,19 @@ public class GameManager : NetworkBehaviour
     }
     
     public void PlayerDisconnected(ulong playerId)  {
-        ServerCurrentCheckpoints.Remove(playerId);
-        ServerPlayerTransforms.Remove(playerId);
-        updatePlacements();
+        // Remove the disconnected player from the LocalClearTimes dictionary
+        LocalClearTimes.Remove(playerId);
+
+        if (IsServer) {
+            // Remove the disconnected player from relevant dictionaries
+            // Then, update the placements so other players get their leaderboard updated
+            ServerCurrentCheckpoints.Remove(playerId);
+            ServerPlayerTransforms.Remove(playerId);
+            ServerClearTimes.Remove(playerId);
+            UpdatePlacements();
+            // When a player disconnects, the server checks if the remaining
+            // players have cleared the track, if so then the game has ended
+            TryEndGame();
+        }
     }
 }
