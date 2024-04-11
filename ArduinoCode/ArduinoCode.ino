@@ -23,7 +23,7 @@ void setOffset() {
 }
 
 const float angle_threshold = 5.0;
-const float scaling_factor = 0.2; 
+const float scaling_factor = 0.1; 
 
 void setup() {
   Wire.begin();
@@ -58,5 +58,5 @@ void loop() {
 
   Serial.println(mapped_value);
 
-  delay(10);
+  delay(20);
 }
