@@ -16,13 +16,13 @@ public class CarController : NetworkBehaviour
     [SerializeField] private Transform groundRayPoint;
     [SerializeField] private Transform leftFrontWheel, rightFrontWheel;
     [SerializeField] private Transform PlayerCameraPrefab;
-    private float speedInput, turnInput;
+    private float speedInput, turnInput, joyStickYValue;
     private bool grounded;
     private Transform PlayerCamera;
 
     // Serial port
     SerialPort serialPort = new SerialPort("COM5", 9600);
-    
+
     // Start is called before the first frame update
     public override void OnNetworkSpawn()
     {
@@ -56,22 +56,32 @@ public class CarController : NetworkBehaviour
         rightFrontWheel.localRotation = Quaternion.Euler(rightFrontWheel.localRotation.eulerAngles.x, turnInput * maxWheelTurn, rightFrontWheel.localRotation.eulerAngles.x);
 
         // Determine the speed based on input
-        speedInput = 0f;
-        if (Input.GetAxis("Vertical") > 0) {
-            speedInput = Input.GetAxis("Vertical") * forwardAccel * 1000f;
-        } else if (Input.GetAxis("Vertical") < 0) {
-            speedInput = Input.GetAxis("Vertical") * reverseAccel * 1000f;
-        }
+        // speedInput = 0f;
+        // if (Input.GetAxis("Vertical") > 0) {
+        //     speedInput = Input.GetAxis("Vertical") * forwardAccel * 1000f;
+        // } else if (Input.GetAxis("Vertical") < 0) {
+        //     speedInput = Input.GetAxis("Vertical") * reverseAccel * 1000f;
+        // }
 
         // Determine the turn based on input
         // turnInput = Input.GetAxis("Horizontal");
         
         // Read data from the serial port
         string data = serialPort.ReadLine();
-        float valueFromArduino = float.Parse(data);
-        print(valueFromArduino);
+        string[] values = data.Split(',');
 
-        turnInput = valueFromArduino;
+        joyStickYValue = float.Parse(values[1]);
+
+        // Determine the speed based on joystick input
+        speedInput = 0f;
+        if (joyStickYValue > 0) {
+            speedInput = joyStickYValue * forwardAccel * 1000f;
+        } else if (joyStickYValue < 0) {
+            speedInput = joyStickYValue * reverseAccel * 1000f;
+        }
+
+        turnInput = -1 * float.Parse(values[0]); // Set the turn input
+
     }
 
     private void FixedUpdate()
@@ -92,7 +102,7 @@ public class CarController : NetworkBehaviour
             RB.drag = dragOnGround;
 
             // Turn the car based on horizontal input, do not turn if the car is not moving forwards or backwards
-            float t = turnInput * turnStrength * Input.GetAxis("Vertical") * Time.fixedDeltaTime;  // Rotation strength
+            float t = turnInput * turnStrength * joyStickYValue * Time.fixedDeltaTime;  // Rotation strength
             Quaternion q = Quaternion.AngleAxis(t, new Vector3(0, 1, 0));  // Quaternion to rotate around Y axis
             RB.MoveRotation(RB.rotation * q);
 
