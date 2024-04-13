@@ -1,6 +1,7 @@
 #include "I2Cdev.h"
 #include "MPU6050.h"
 #include "Wire.h"
+#include <LiquidCrystal.h>
 
 // define the calibration offsets obtained from the calibration process
 #define ACCEL_X_OFFSET -478
@@ -26,12 +27,25 @@ const float angle_threshold = 5.0;
 const float scaling_factor = 0.1;
 const int joystickY = A0;
 
+// LCD pins
+const int rs = 8;
+const int en = 7;
+const int d4 = 6;
+const int d5 = 5;
+const int d6 = 4;
+const int d7 = 3;
+
+// initialize LCD
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
 void setup() {
   Wire.begin();
   Serial.begin(9600);
 
   mpu.initialize();
   pinMode(joystickY, INPUT);
+
+  lcd.begin(16, 2);
   
   // set the calibration offsets
   setOffset();
@@ -60,10 +74,45 @@ void loop() {
 
   // map value between [-1, 1]
   float joyStickYValue = map(analogRead(joystickY) + 4, 0, 1023, 100, -100) / 100.0;
+  
+  String place = recvSerial();
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print(place);
 
   String data = String(mapped_value) + "," + String(joyStickYValue);
 
   Serial.println(data);
 
   delay(20);
+}
+
+String recvSerial() {
+  String place = "GET MOVIN";
+
+  if (Serial.available()) {
+    int serialData = Serial.read() - '0'; // convert to int
+    
+    switch (serialData) {
+      case 1:
+        place = "1ST";
+        break;
+      case 2:
+        place = "2ND";
+        break;
+      case 3:
+        place = "3RD";
+        break;
+      case 4:
+        place = "4TH";
+        break;
+    }
+  }
+
+  if (place != "GET MOVIN") {
+    return "YOU ARE: " + place;
+  }
+
+  return place;
 }
