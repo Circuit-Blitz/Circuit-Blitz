@@ -50,6 +50,17 @@ public class CarController : NetworkBehaviour
         }
     }
 
+    private int GetLocalPlayerPlacement()
+    {
+        // get the list of placements
+        NetworkList<ulong> placements = GameManager.Instance.GetPlacements();
+
+        // find the index of the local player's ID in the placements list
+        int placementIndex = placements.IndexOf(NetworkManager.Singleton.LocalClientId);
+
+        return placementIndex + 1;
+    }
+
     private void Update() {
         // Only the local player should run this code
         if (!IsOwner) return;
@@ -77,6 +88,9 @@ public class CarController : NetworkBehaviour
         // turnInput = Input.GetAxis("Horizontal");
         
         if (serialPort.IsOpen) {
+            // Send place
+            serialPort.Write(GetLocalPlayerPlacement().ToString());
+
             // Read data from the serial port
             string data = serialPort.ReadLine();
             string[] values = data.Split(',');
