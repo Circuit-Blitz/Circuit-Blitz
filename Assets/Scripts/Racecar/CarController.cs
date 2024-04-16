@@ -2,11 +2,12 @@ using Unity.Netcode;
 using UnityEngine;
 using System.IO;
 using System.IO.Ports;
+using System.Collections;
 
 public class CarController : NetworkBehaviour
 {
-    [SerializeField] private float forwardAccel = 8f;
-    [SerializeField] private float reverseAccel = 4f;
+    [SerializeField] private float forwardAccel = 240f;
+    [SerializeField] private float reverseAccel = 120f;
     [SerializeField] private float turnStrength = 100f;
     [SerializeField] private float dragOnGround = 2f;
     [SerializeField] private float dragInAir = 0.1f;
@@ -41,7 +42,7 @@ public class CarController : NetworkBehaviour
         try 
         {
             // Open the serial port
-            serialPort = new SerialPort("COM5", 9600);
+            serialPort = new SerialPort("/dev/cu.usbmodem1101", 9600);
             serialPort.Open();
         }
         catch (IOException e)
@@ -138,6 +139,46 @@ public class CarController : NetworkBehaviour
             RB.AddRelativeForce(Vector3.forward * speedInput * Time.fixedDeltaTime);
         } else {
             RB.drag = dragInAir;
+        }
+    }
+    
+    private IEnumerator HitBanana() {
+        double startTime = Time.timeAsDouble;
+        const uint seconds = 3;  // Number of seconds the banana is in effect
+        const float bananaStrength = 20;  // How strong the banana's effect is
+
+        // Spin the car for X seconds
+        yield return new WaitUntil(() => {
+            float t = bananaStrength * Time.fixedDeltaTime;
+            Quaternion q = Quaternion.AngleAxis(t, new Vector3(0, 1, 0));  // Quaternion to rotate around Y axis
+            RB.MoveRotation(RB.rotation * q);
+
+            return (Time.timeAsDouble - startTime) >= seconds;
+        });
+    }
+    
+    private IEnumerator HitWatermelon() {
+        const uint seconds = 5;  // Number of seconds the watermelon is in effect
+        const float watermelonStrength = 40;  // How strong the watermelon's effect is
+
+        // Increase the speed of the car by X
+        forwardAccel += watermelonStrength;
+        yield return new WaitForSeconds(seconds);
+        // Decrease the speed of the car by X back to normal
+        forwardAccel -= watermelonStrength;
+    }
+    
+    void OnTriggerEnter(Collider collision)
+    {
+        switch (collision.gameObject.tag) {
+            case "Banana":
+                Destroy(collision.gameObject);
+                StartCoroutine(HitBanana());
+                break;
+            case "Watermelon":
+                Destroy(collision.gameObject);
+                StartCoroutine(HitWatermelon());
+                break;
         }
     }
 }

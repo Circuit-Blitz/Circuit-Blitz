@@ -4,12 +4,12 @@
 #include <LiquidCrystal.h>
 
 // define the calibration offsets obtained from the calibration process
-#define ACCEL_X_OFFSET -478
-#define ACCEL_Y_OFFSET 709
-#define ACCEL_Z_OFFSET 728
-#define GYRO_X_OFFSET 9
-#define GYRO_Y_OFFSET -121
-#define GYRO_Z_OFFSET -36
+#define ACCEL_X_OFFSET -1446
+#define ACCEL_Y_OFFSET -3389
+#define ACCEL_Z_OFFSET 1394
+#define GYRO_X_OFFSET 126
+#define GYRO_Y_OFFSET -92
+#define GYRO_Z_OFFSET -23
 
 MPU6050 mpu;
 
