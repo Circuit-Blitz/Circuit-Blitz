@@ -19,4 +19,4 @@ This is a very important step that needs to be done before your MPU6050 can be u
 
 2. Copy the code and upload it to your Arduino
 
-3. Replace the offsets in the ArduinoCode.ino file with the ones you got from thr calibration.
+3. Replace the offsets in the `ArduinoCode.ino` file with the ones you got from the calibration.
