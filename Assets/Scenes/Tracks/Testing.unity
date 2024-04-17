@@ -191,7 +191,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 1474268130}
     m_Modifications:
     - target: {fileID: -4216859302048453862, guid: 66b2596e76776954b8bc7aeba3c826a5, type: 3}
       propertyPath: m_LocalScale.x
@@ -207,15 +207,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 66b2596e76776954b8bc7aeba3c826a5, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -557.42
+      value: -281.82993
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 66b2596e76776954b8bc7aeba3c826a5, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -208.78563
+      value: -104.655716
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 66b2596e76776954b8bc7aeba3c826a5, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -821.96
+      value: -380.00363
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 66b2596e76776954b8bc7aeba3c826a5, type: 3}
       propertyPath: m_LocalRotation.w
@@ -223,7 +223,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 66b2596e76776954b8bc7aeba3c826a5, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 66b2596e76776954b8bc7aeba3c826a5, type: 3}
       propertyPath: m_LocalRotation.y
@@ -254,6 +254,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 66b2596e76776954b8bc7aeba3c826a5, type: 3}
+--- !u!4 &82954934 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4216859302048453862, guid: 66b2596e76776954b8bc7aeba3c826a5, type: 3}
+  m_PrefabInstance: {fileID: 82954933}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &91755097
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5488,6 +5493,7 @@ Transform:
   - {fileID: 561253457}
   - {fileID: 2126115145}
   - {fileID: 1673979102}
+  - {fileID: 82954934}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1484813644
@@ -7449,4 +7455,3 @@ SceneRoots:
   - {fileID: 1202206030}
   - {fileID: 1474268130}
   - {fileID: 1337355889}
-  - {fileID: 82954933}
