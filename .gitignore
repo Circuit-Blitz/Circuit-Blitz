@@ -74,6 +74,4 @@ crashlytics-build.properties
 # Kill .DS_Store
 .DS_Store
 
-# Remove Addons from commit
-/[Aa]ssets/[Aa]ddons
 .vscode/settings.json
